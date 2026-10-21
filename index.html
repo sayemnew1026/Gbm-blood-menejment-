@@ -16,6 +16,7 @@
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .custom-scroll::-webkit-scrollbar { width: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+    .tab-btn.active { background: #dc2626; color: #fff; }
   </style>
 </head>
 <body class="font-sans antialiased text-gray-800">
@@ -112,7 +113,7 @@
         <div class="bg-red-50 text-red-600 p-2 rounded-lg"><i class="fas fa-user-plus"></i></div>
         <h3 class="text-lg font-bold text-gray-800">Register as Donor</h3>
       </div>
-      <p class="text-xs text-gray-500 mb-5">Your details will be added to the donor directory.</p>
+      <p class="text-xs text-gray-500 mb-5">Your details will be sent to admin for approval before appearing in the directory.</p>
       <form id="registerForm" class="space-y-4">
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
@@ -142,86 +143,120 @@
         </div>
         <div id="registerError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
         <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md shadow-red-200 transition flex items-center justify-center gap-2">
-          <i class="fas fa-check"></i> Save Donor
+          <i class="fas fa-paper-plane"></i> Submit for Approval
         </button>
       </form>
     </div>
   </div>
-
   <div id="adminLoginModal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 modal-backdrop">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 fade-in relative">
-      <button id="closeAdminLoginBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
-        <i class="fas fa-times"></i>
-      </button>
-      <div class="flex items-center gap-2.5 mb-1">
-        <div class="bg-gray-800 text-white p-2 rounded-lg"><i class="fas fa-lock"></i></div>
-        <h3 class="text-lg font-bold text-gray-800">Admin Login</h3>
-      </div>
-      <p class="text-xs text-gray-500 mb-5">Restricted access. Authorized personnel only.</p>
-      <form id="adminLoginForm" class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Admin ID</label>
-          <input type="text" id="adminId" required placeholder="Enter admin ID" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition" />
-        </div>
-        <div>
-          <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-          <input type="password" id="adminPass" required placeholder="Enter password" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition" />
-        </div>
-        <div id="adminLoginError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
-        <button type="submit" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2">
-          <i class="fas fa-right-to-bracket"></i> Login
-        </button>
-      </form>
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 fade-in relative">
+    <button id="closeAdminLoginBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+      <i class="fas fa-times"></i>
+    </button>
+    <div class="flex items-center gap-2.5 mb-1">
+      <div class="bg-gray-800 text-white p-2 rounded-lg"><i class="fas fa-lock"></i></div>
+      <h3 class="text-lg font-bold text-gray-800">Admin Login</h3>
     </div>
+    <p class="text-xs text-gray-500 mb-5">Restricted access. Authorized personnel only.</p>
+    <form id="adminLoginForm" class="space-y-4">
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Admin ID</label>
+        <input type="text" id="adminId" required placeholder="Enter admin ID" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition" />
+      </div>
+      <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+        <input type="password" id="adminPass" required placeholder="Enter password" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition" />
+      </div>
+      <div id="adminLoginError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+      <button type="submit" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+        <i class="fas fa-right-to-bracket"></i> Login
+      </button>
+    </form>
   </div>
+</div>
+
 <div id="adminPanelModal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-4 modal-backdrop">
-  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col fade-in relative">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-5xl max-h-[92vh] flex flex-col fade-in relative">
     <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
       <div class="flex items-center gap-2.5">
         <div class="bg-gray-900 text-white p-2 rounded-lg"><i class="fas fa-user-shield"></i></div>
         <div>
           <h3 class="text-lg font-bold text-gray-800 leading-tight">Admin Panel</h3>
-          <p class="text-[11px] text-gray-500">Full donor directory management</p>
+          <p class="text-[11px] text-gray-500">Approve requests & manage donors</p>
         </div>
       </div>
       <div class="flex items-center gap-2">
-        <span id="adminTotalBadge" class="text-xs bg-red-100 text-red-700 font-bold px-3 py-1.5 rounded-full">0 donors</span>
         <button id="closeAdminPanelBtn" class="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
           <i class="fas fa-times"></i>
         </button>
       </div>
     </div>
-    <div class="px-5 py-3 border-b border-gray-100 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-      <div class="relative flex-1 max-w-xs">
-        <input id="adminSearchInput" type="text" placeholder="Search name, phone, batch..." class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition" />
-        <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-      </div>
-      <select id="adminFilterBlood" class="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition">
-        <option value="all">All blood groups</option>
-        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-        <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
-      </select>
-    </div>
-    <div class="overflow-auto custom-scroll flex-1">
-      <table class="w-full text-sm">
-        <thead class="bg-gray-50 sticky top-0 z-10">
-          <tr class="text-left text-gray-600">
-            <th class="px-4 py-2.5 font-semibold">#</th>
-            <th class="px-4 py-2.5 font-semibold">Name</th>
-            <th class="px-4 py-2.5 font-semibold">Phone</th>
-            <th class="px-4 py-2.5 font-semibold">Blood</th>
-            <th class="px-4 py-2.5 font-semibold">Batch</th>
-            <th class="px-4 py-2.5 font-semibold text-right">Action</th>
-          </tr>
-        </thead>
-        <tbody id="adminTableBody"></tbody>
-      </table>
-    </div>
-    <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-      <span id="adminVisibleCount">Showing 0 donors</span>
-      <button id="adminLogoutBtn" class="text-red-600 hover:text-red-700 font-semibold flex items-center gap-1.5">
-        <i class="fas fa-right-from-bracket"></i> Logout
+
+    <div class="px-5 pt-3 flex gap-2 border-b border-gray-100">
+      <button id="tabApproved" class="tab-btn active text-sm font-semibold px-4 py-2 rounded-t-lg transition">
+        <i class="fas fa-circle-check mr-1"></i> Approved Donors
+        <span id="approvedCount" class="ml-1 bg-white/30 text-xs px-1.5 rounded-full">0</span>
       </button>
+      <button id="tabPending" class="tab-btn text-sm font-semibold px-4 py-2 rounded-t-lg text-gray-600 hover:bg-gray-100 transition">
+        <i class="fas fa-hourglass-half mr-1"></i> Pending Requests
+        <span id="pendingCount" class="ml-1 bg-red-600 text-white text-xs px-1.5 rounded-full">0</span>
+      </button>
+    </div>
+
+    <div id="approvedTabContent" class="flex-1 flex flex-col overflow-hidden">
+      <div class="px-5 py-3 border-b border-gray-100 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+        <div class="relative flex-1 max-w-xs">
+          <input id="adminSearchInput" type="text" placeholder="Search name, phone, batch..." class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition" />
+          <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+        </div>
+        <select id="adminFilterBlood" class="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition">
+          <option value="all">All blood groups</option>
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+        </select>
+      </div>
+      <div class="overflow-auto custom-scroll flex-1">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 sticky top-0 z-10">
+            <tr class="text-left text-gray-600">
+              <th class="px-4 py-2.5 font-semibold">#</th>
+              <th class="px-4 py-2.5 font-semibold">Name</th>
+              <th class="px-4 py-2.5 font-semibold">Phone</th>
+              <th class="px-4 py-2.5 font-semibold">Blood</th>
+              <th class="px-4 py-2.5 font-semibold">Batch</th>
+              <th class="px-4 py-2.5 font-semibold text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="adminTableBody"></tbody>
+        </table>
+      </div>
+      <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+        <span id="adminVisibleCount">Showing 0 donors</span>
+        <button id="adminLogoutBtn" class="text-red-600 hover:text-red-700 font-semibold flex items-center gap-1.5">
+          <i class="fas fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <div id="pendingTabContent" class="hidden flex-1 flex flex-col overflow-hidden">
+      <div class="overflow-auto custom-scroll flex-1">
+        <table class="w-full text-sm">
+          <thead class="bg-amber-50 sticky top-0 z-10">
+            <tr class="text-left text-gray-600">
+              <th class="px-4 py-2.5 font-semibold">#</th>
+              <th class="px-4 py-2.5 font-semibold">Name</th>
+              <th class="px-4 py-2.5 font-semibold">Phone</th>
+              <th class="px-4 py-2.5 font-semibold">Blood</th>
+              <th class="px-4 py-2.5 font-semibold">Batch</th>
+              <th class="px-4 py-2.5 font-semibold text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody id="pendingTableBody"></tbody>
+        </table>
+      </div>
+      <div class="px-5 py-3 border-t border-gray-100 text-xs text-gray-500">
+        <span id="pendingVisibleCount">Showing 0 pending requests</span>
+      </div>
     </div>
   </div>
 </div>
@@ -229,11 +264,9 @@
 <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2">
   <i id="toastIcon" class="fas fa-check-circle text-green-400"></i>
   <span id="toastMsg">Saved</span>
-</div>
-
-<script>
+                </div>
+                <script>
   let donors = [
-    // ---- 7th Batch ----
     { name: "MD RAFIJUR RAHMAN (ZUBORAJ)", phone: "01521549709", blood: "A+", batch: "7th Batch" },
     { name: "SADIA NAZNIN", phone: "N/A", blood: "AB+", batch: "7th Batch" },
     { name: "AL MUHA TAMIM", phone: "01519609076", blood: "B+", batch: "7th Batch" },
@@ -255,8 +288,6 @@
     { name: "JANNATUL CHOITY", phone: "N/A", blood: "B+", batch: "7th Batch" },
     { name: "FOUZIA NILA", phone: "N/A", blood: "A+", batch: "7th Batch" },
     { name: "MEADUL", phone: "01630475777", blood: "O+", batch: "7th Batch" },
-
-    // ---- 8th Batch ----
     { name: "SAMAPTY", phone: "N/A", blood: "O+", batch: "8th Batch" },
     { name: "Nayan Sarker", phone: "01309058667", blood: "O+", batch: "8th Batch" },
     { name: "Niloy Saha", phone: "01757707421", blood: "B+", batch: "8th Batch" },
@@ -271,8 +302,6 @@
     { name: "Nabin", phone: "01795346671", blood: "O+", batch: "8th Batch" },
     { name: "Sabuj", phone: "01405430182", blood: "B+", batch: "8th Batch" },
     { name: "Chandrika", phone: "N/A", blood: "O+", batch: "8th Batch" },
-
-    // ---- 9th Batch ----
     { name: "Saiful Islam Gazi", phone: "01708574833", blood: "A+", batch: "9th Batch" },
     { name: "Farabi Ahmed Mahedi", phone: "01921214421", blood: "O+", batch: "9th Batch" },
     { name: "Ashraful Haque Lohan", phone: "01304935757", blood: "O+", batch: "9th Batch" },
@@ -290,8 +319,6 @@
     { name: "Shariar Sejan", phone: "01813227221", blood: "B+", batch: "9th Batch" },
     { name: "Jubayer", phone: "01406836507", blood: "O+", batch: "9th Batch" },
     { name: "Simi", phone: "N/A", blood: "B+", batch: "9th Batch" },
-
-    // ---- 10th Batch ----
     { name: "MAHI", phone: "N/A", blood: "AB+", batch: "10th Batch" },
     { name: "SUSMITA Karmakar", phone: "N/A", blood: "O+", batch: "10th Batch" },
     { name: "FARDIN KHAN", phone: "01714157038", blood: "A+", batch: "10th Batch" },
@@ -311,8 +338,7 @@
     { name: "Azam", phone: "01701018524", blood: "O+", batch: "10th Batch" },
     { name: "Raiyan", phone: "01927894216", blood: "A+", batch: "10th Batch" },
     { name: "Md Tanvir Rahman", phone: "N/A", blood: "N/A", batch: "10th Batch" },
-      // ---- 11th Batch ----
-      { name: "ESTIAK SIAM", phone: "01706779389", blood: "O+", batch: "11th Batch" },
+          { name: "ESTIAK SIAM", phone: "01706779389", blood: "O+", batch: "11th Batch" },
       { name: "MARIA TAZMIM", phone: "N/A", blood: "A-", batch: "11th Batch" },
       { name: "ARBATUL RATUL", phone: "01720921286", blood: "A+", batch: "11th Batch" },
       { name: "JEET DAS", phone: "01403570846", blood: "B+", batch: "11th Batch" },
@@ -350,8 +376,6 @@
       { name: "AL AMIM", phone: "01302696330", blood: "B+", batch: "11th Batch" },
       { name: "DEEP SARKAR", phone: "01718436506", blood: "B+", batch: "11th Batch" },
       { name: "SOLAIMAN MOLLIK", phone: "01740898653", blood: "B+", batch: "11th Batch" },
-
-      // ---- 12th Batch ----
       { name: "Mushfiqur Rahman", phone: "8801312540359", blood: "A+", batch: "12th Batch" },
       { name: "Arobi Subah", phone: "N/A", blood: "A+", batch: "12th Batch" },
       { name: "Sayem", phone: "8801580816296", blood: "AB-", batch: "12th Batch" },
@@ -385,8 +409,6 @@
       { name: "HM Fayez", phone: "N/A", blood: "B+", batch: "12th Batch" },
       { name: "Rajit", phone: "N/A", blood: "B+", batch: "12th Batch" },
       { name: "Devasish Halder", phone: "N/A", blood: "B+", batch: "12th Batch" },
-
-      // ---- 13th Batch ----
       { name: "MD.Mehedi Hasan", phone: "01309682940", blood: "B+", batch: "13th Batch" },
       { name: "Tasrif Ahmed", phone: "01975671898", blood: "N/A", batch: "13th Batch" },
       { name: "Sumona", phone: "N/A", blood: "B+", batch: "13th Batch" },
@@ -405,8 +427,6 @@
       { name: "Annendita", phone: "N/A", blood: "A+", batch: "13th Batch" },
       { name: "Tarin Chowdhury", phone: "N/A", blood: "A+", batch: "13th Batch" },
       { name: "Ripa", phone: "N/A", blood: "O+", batch: "13th Batch" },
-
-      // ---- 14th Batch (sample) ----
       { name: "Arif Hossain", phone: "01711111111", blood: "O+", batch: "14th Batch" },
       { name: "Nusrat Jahan", phone: "N/A", blood: "B+", batch: "14th Batch" },
       { name: "Tanvir Ahmed", phone: "01822223333", blood: "A-", batch: "14th Batch" },
@@ -416,6 +436,8 @@
       { name: "Farhana Akter", phone: "N/A", blood: "B-", batch: "14th Batch" }
     ];
 
+    let pendingDonors = [];
+
     const ADMIN_ID_B64 = "YWRtaW4=";
     const ADMIN_PASS_PLAIN_RUNTIME = "stats@2024";
 
@@ -424,55 +446,52 @@
       const buf = await crypto.subtle.digest("SHA-256", enc);
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
-
     function safeEqual(a, b) {
       if (a.length !== b.length) return false;
       let diff = 0;
       for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
       return diff === 0;
     }
-
-    (async () => {
-      try {
-        const hash = await sha256(ADMIN_PASS_PLAIN_RUNTIME);
-        sessionStorage.setItem("_ak", hash);
-      } catch (e) {}
-    })();
+    (async () => { try { sessionStorage.setItem("_ak", await sha256(ADMIN_PASS_PLAIN_RUNTIME)); } catch (e) {} })();
 
     let currentSearchBlood = null;
     let adminLoggedIn = false;
+    let activeTab = "approved";
 
-    const bloodSelect    = document.getElementById("bloodGroupSelect");
-    const searchBtn      = document.getElementById("searchBtn");
+    const bloodSelect = document.getElementById("bloodGroupSelect");
+    const searchBtn = document.getElementById("searchBtn");
     const resultsSection = document.getElementById("resultsSection");
-    const donorGrid      = document.getElementById("donorGrid");
-    const resultCount    = document.getElementById("resultCount");
-    const emptyState     = document.getElementById("emptyState");
-    const searchHint     = document.getElementById("searchHint");
-
-    const openRegisterBtn  = document.getElementById("openRegisterBtn");
-    const registerModal    = document.getElementById("registerModal");
+    const donorGrid = document.getElementById("donorGrid");
+    const resultCount = document.getElementById("resultCount");
+    const emptyState = document.getElementById("emptyState");
+    const searchHint = document.getElementById("searchHint");
+    const openRegisterBtn = document.getElementById("openRegisterBtn");
+    const registerModal = document.getElementById("registerModal");
     const closeRegisterBtn = document.getElementById("closeRegisterBtn");
-    const registerForm     = document.getElementById("registerForm");
-    const registerError    = document.getElementById("registerError");
-
-    const openAdminBtn       = document.getElementById("openAdminBtn");
-    const adminLoginModal    = document.getElementById("adminLoginModal");
+    const registerForm = document.getElementById("registerForm");
+    const registerError = document.getElementById("registerError");
+    const openAdminBtn = document.getElementById("openAdminBtn");
+    const adminLoginModal = document.getElementById("adminLoginModal");
     const closeAdminLoginBtn = document.getElementById("closeAdminLoginBtn");
-    const adminLoginForm     = document.getElementById("adminLoginForm");
-    const adminLoginError    = document.getElementById("adminLoginError");
-
-    const adminPanelModal    = document.getElementById("adminPanelModal");
+    const adminLoginForm = document.getElementById("adminLoginForm");
+    const adminLoginError = document.getElementById("adminLoginError");
+    const adminPanelModal = document.getElementById("adminPanelModal");
     const closeAdminPanelBtn = document.getElementById("closeAdminPanelBtn");
-    const adminTableBody     = document.getElementById("adminTableBody");
-    const adminSearchInput   = document.getElementById("adminSearchInput");
-    const adminFilterBlood   = document.getElementById("adminFilterBlood");
-    const adminTotalBadge    = document.getElementById("adminTotalBadge");
-    const adminVisibleCount  = document.getElementById("adminVisibleCount");
-    const adminLogoutBtn     = document.getElementById("adminLogoutBtn");
-
-    const toast     = document.getElementById("toast");
-    const toastMsg  = document.getElementById("toastMsg");
+    const adminTableBody = document.getElementById("adminTableBody");
+    const pendingTableBody = document.getElementById("pendingTableBody");
+    const adminSearchInput = document.getElementById("adminSearchInput");
+    const adminFilterBlood = document.getElementById("adminFilterBlood");
+    const adminVisibleCount = document.getElementById("adminVisibleCount");
+    const pendingVisibleCount = document.getElementById("pendingVisibleCount");
+    const adminLogoutBtn = document.getElementById("adminLogoutBtn");
+    const tabApproved = document.getElementById("tabApproved");
+    const tabPending = document.getElementById("tabPending");
+    const approvedTabContent = document.getElementById("approvedTabContent");
+    const pendingTabContent = document.getElementById("pendingTabContent");
+    const approvedCount = document.getElementById("approvedCount");
+    const pendingCount = document.getElementById("pendingCount");
+    const toast = document.getElementById("toast");
+    const toastMsg = document.getElementById("toastMsg");
     const toastIcon = document.getElementById("toastIcon");
 
     function getBadgeStyle(blood) {
@@ -486,22 +505,18 @@
         case "AB-": return base + " bg-purple-50 text-purple-700";
         case "O+": return base + " bg-amber-100 text-amber-800";
         case "O-": return base + " bg-amber-50 text-amber-700";
-        default:   return base + " bg-gray-100 text-gray-700";
+        default: return base + " bg-gray-100 text-gray-700";
       }
     }
-
     function showToast(msg, type = "success") {
       toastMsg.textContent = msg;
-      toastIcon.className = type === "error"
-        ? "fas fa-circle-exclamation text-red-400"
-        : "fas fa-check-circle text-green-400";
+      toastIcon.className = type === "error" ? "fas fa-circle-exclamation text-red-400" : "fas fa-check-circle text-green-400";
       toast.classList.remove("hidden");
       clearTimeout(showToast._t);
       showToast._t = setTimeout(() => toast.classList.add("hidden"), 2800);
     }
-
-    function openModal(el)  { el.classList.remove("hidden"); document.body.style.overflow = "hidden"; }
-    function closeModal(el) { el.classList.add("hidden");    document.body.style.overflow = ""; }
+    function openModal(el) { el.classList.remove("hidden"); document.body.style.overflow = "hidden"; }
+    function closeModal(el) { el.classList.add("hidden"); document.body.style.overflow = ""; }
 
     function renderDonorCards(list) {
       donorGrid.innerHTML = "";
@@ -518,9 +533,7 @@
           card.innerHTML = `
             <div class="flex items-start justify-between gap-2">
               <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center text-red-600">
-                  <i class="fas fa-user text-sm"></i>
-                </div>
+                <div class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center text-red-600"><i class="fas fa-user text-sm"></i></div>
                 <h3 class="font-bold text-gray-800 leading-tight text-[15px]">${donor.name}</h3>
               </div>
               <span class="${getBadgeStyle(donor.blood)}">${donor.blood}</span>
@@ -537,7 +550,22 @@
           donorGrid.appendChild(card);
         });
       }
-      resultCount.textContent = `${list.length} donor${list.length !== 1 ? "s" : ""}`;
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            resultCount.textContent = `${list.length} donor${list.length !== 1 ? "s" : ""}`;
     }
 
     function performSearch() {
@@ -570,7 +598,7 @@
 
     registerForm.addEventListener("submit", e => {
       e.preventDefault();
-      const name  = document.getElementById("regName").value.trim();
+      const name = document.getElementById("regName").value.trim();
       const phone = document.getElementById("regPhone").value.trim() || "N/A";
       const blood = document.getElementById("regBlood").value;
       const batch = document.getElementById("regBatch").value;
@@ -579,12 +607,17 @@
         registerError.classList.remove("hidden");
         return;
       }
-      donors.push({ name, phone, blood, batch });
+      const duplicate = pendingDonors.some(p => p.name.toLowerCase() === name.toLowerCase() && p.blood === blood && p.batch === batch);
+      if (duplicate) {
+        registerError.textContent = "A similar request is already pending approval.";
+        registerError.classList.remove("hidden");
+        return;
+      }
+      pendingDonors.push({ name, phone, blood, batch, submittedAt: new Date().toISOString() });
       registerError.classList.add("hidden");
       closeModal(registerModal);
-      showToast("Donor registered successfully!");
-      if (currentSearchBlood) renderDonorCards(donors.filter(d => d.blood === currentSearchBlood));
-      if (adminLoggedIn && !adminPanelModal.classList.contains("hidden")) renderAdminTable();
+      showToast("Request submitted! Waiting for admin approval.", "success");
+      if (adminLoggedIn && !adminPanelModal.classList.contains("hidden")) renderAdminPanel();
     });
 
     openAdminBtn.addEventListener("click", () => {
@@ -597,16 +630,14 @@
 
     adminLoginForm.addEventListener("submit", async e => {
       e.preventDefault();
-      const idVal  = document.getElementById("adminId").value.trim();
-      const passVal= document.getElementById("adminPass").value;
+      const idVal = document.getElementById("adminId").value.trim();
+      const passVal = document.getElementById("adminPass").value;
       let expectedId = "";
       try { expectedId = atob(ADMIN_ID_B64); } catch (_) {}
       let enteredHash = "";
       try { enteredHash = await sha256(passVal); } catch (_) {}
       const correctHash = sessionStorage.getItem("_ak") || "";
-      const idOk   = safeEqual(idVal, expectedId);
-      const passOk = safeEqual(enteredHash, correctHash);
-      if (idOk && passOk) {
+      if (safeEqual(idVal, expectedId) && safeEqual(enteredHash, correctHash)) {
         adminLoggedIn = true;
         adminLoginError.classList.add("hidden");
         closeModal(adminLoginModal);
@@ -617,7 +648,7 @@
       }
     });
 
-    function openAdminPanel() { renderAdminTable(); openModal(adminPanelModal); }
+    function openAdminPanel() { renderAdminPanel(); openModal(adminPanelModal); }
     closeAdminPanelBtn.addEventListener("click", () => closeModal(adminPanelModal));
     adminPanelModal.addEventListener("click", e => { if (e.target === adminPanelModal) closeModal(adminPanelModal); });
     adminLogoutBtn.addEventListener("click", () => {
@@ -626,20 +657,34 @@
       showToast("Logged out from Admin Panel.");
     });
 
+    tabApproved.addEventListener("click", () => {
+      activeTab = "approved";
+      tabApproved.classList.add("active");
+      tabPending.classList.remove("active");
+      approvedTabContent.classList.remove("hidden");
+      pendingTabContent.classList.add("hidden");
+    });
+    tabPending.addEventListener("click", () => {
+      activeTab = "pending";
+      tabPending.classList.add("active");
+      tabApproved.classList.remove("active");
+      pendingTabContent.classList.remove("hidden");
+      approvedTabContent.classList.add("hidden");
+    });
+
+    function renderAdminPanel() {
+      renderAdminTable();
+      renderPendingTable();
+      approvedCount.textContent = donors.length;
+      pendingCount.textContent = pendingDonors.length;
+    }
+
     function renderAdminTable() {
       const term = adminSearchInput.value.trim().toLowerCase();
       const bloodFilter = adminFilterBlood.value;
       let list = donors.slice();
       if (bloodFilter !== "all") list = list.filter(d => d.blood === bloodFilter);
-      if (term) {
-        list = list.filter(d =>
-          d.name.toLowerCase().includes(term) ||
-          (d.phone && d.phone.toLowerCase().includes(term)) ||
-          d.batch.toLowerCase().includes(term) ||
-          d.blood.toLowerCase().includes(term)
-        );
-      }
-      adminTotalBadge.textContent = `${donors.length} donors`;
+      if (term) list = list.filter(d => d.name.toLowerCase().includes(term) || (d.phone && d.phone.toLowerCase().includes(term)) || d.batch.toLowerCase().includes(term) || d.blood.toLowerCase().includes(term));
       adminVisibleCount.textContent = `Showing ${list.length} donor${list.length !== 1 ? "s" : ""}`;
       adminTableBody.innerHTML = "";
       if (list.length === 0) {
@@ -663,7 +708,7 @@
             </button>
           </td>
         `;
-                adminTableBody.appendChild(tr);
+        adminTableBody.appendChild(tr);
       });
       adminTableBody.querySelectorAll(".delete-donor").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -671,8 +716,60 @@
           if (!isNaN(idx) && idx >= 0 && idx < donors.length) {
             const removed = donors.splice(idx, 1)[0];
             showToast(`Removed "${removed.name}" from directory.`);
-            renderAdminTable();
+            renderAdminPanel();
             if (currentSearchBlood) renderDonorCards(donors.filter(d => d.blood === currentSearchBlood));
+          }
+        });
+      });
+    }
+
+    function renderPendingTable() {
+      pendingVisibleCount.textContent = `Showing ${pendingDonors.length} pending request${pendingDonors.length !== 1 ? "s" : ""}`;
+      pendingTableBody.innerHTML = "";
+      if (pendingDonors.length === 0) {
+        pendingTableBody.innerHTML = `<tr><td colspan="6" class="px-4 py-10 text-center text-gray-400 text-sm"><i class="fas fa-check-double text-2xl mb-2 block text-green-400"></i>No pending requests. All clear!</td></tr>`;
+        return;
+      }
+      pendingDonors.forEach((donor, i) => {
+        const phoneDisplay = (donor.phone && donor.phone !== "N/A" && donor.phone.trim() !== "") ? donor.phone : "N/A";
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-gray-50 hover:bg-amber-50/40 transition";
+        tr.innerHTML = `
+          <td class="px-4 py-2.5 text-gray-400 text-xs">${i + 1}</td>
+          <td class="px-4 py-2.5 font-medium text-gray-800">${donor.name}</td>
+          <td class="px-4 py-2.5 ${phoneDisplay === "N/A" ? "text-gray-400 italic" : "text-gray-600"}">${phoneDisplay}</td>
+          <td class="px-4 py-2.5"><span class="${getBadgeStyle(donor.blood)} text-xs">${donor.blood}</span></td>
+          <td class="px-4 py-2.5 text-gray-500">${donor.batch}</td>
+          <td class="px-4 py-2.5 text-right whitespace-nowrap">
+            <button data-approve="${i}" class="approve-btn text-green-600 hover:text-white hover:bg-green-600 border border-green-500 text-xs font-semibold px-2.5 py-1 rounded-lg mr-1 transition" title="Approve">
+              <i class="fas fa-check"></i> Approve
+            </button>
+            <button data-reject="${i}" class="reject-btn text-red-500 hover:text-white hover:bg-red-600 border border-red-400 text-xs font-semibold px-2.5 py-1 rounded-lg transition" title="Reject">
+              <i class="fas fa-times"></i> Reject
+            </button>
+          </td>
+        `;
+        pendingTableBody.appendChild(tr);
+      });
+      pendingTableBody.querySelectorAll(".approve-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-approve"), 10);
+          if (!isNaN(idx) && idx >= 0 && idx < pendingDonors.length) {
+            const req = pendingDonors.splice(idx, 1)[0];
+            donors.push({ name: req.name, phone: req.phone, blood: req.blood, batch: req.batch });
+            showToast(`Approved "${req.name}" — added to directory.`);
+            renderAdminPanel();
+            if (currentSearchBlood) renderDonorCards(donors.filter(d => d.blood === currentSearchBlood));
+          }
+        });
+      });
+      pendingTableBody.querySelectorAll(".reject-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-reject"), 10);
+          if (!isNaN(idx) && idx >= 0 && idx < pendingDonors.length) {
+            const req = pendingDonors.splice(idx, 1)[0];
+            showToast(`Rejected "${req.name}".`, "error");
+            renderAdminPanel();
           }
         });
       });
@@ -690,3 +787,4 @@
   </script>
 </body>
 </html>
+            
