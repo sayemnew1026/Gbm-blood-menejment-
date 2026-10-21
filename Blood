@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Statistics Blood Bank · Govt. Brojomohon College, Barishal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    body { background: linear-gradient(145deg, #f8fafc 0%, #eef2f7 100%); min-height: 100vh; }
+    .donor-card { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+    .donor-card:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -10px rgba(0,0,0,0.15); }
+    .blood-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 3.4rem; padding: 0.28rem 0.65rem; border-radius: 9999px; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.02em; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .modal-backdrop { background: rgba(15,23,42,0.55); backdrop-filter: blur(3px); }
+    .fade-in { animation: fadeIn 0.25s ease-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
+  </style>
+</head>
+<body class="font-sans antialiased text-gray-800">
+
+  <header class="bg-white/85 backdrop-blur-md shadow-sm sticky top-0 z-20 border-b border-red-100">
+    <div class="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="bg-red-600 text-white p-2.5 rounded-xl shadow-md shadow-red-200">
+          <i class="fas fa-droplet text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-lg sm:text-xl font-extrabold tracking-tight text-gray-900 leading-tight">
+            Statistics <span class="text-red-600">Blood Bank</span>
+          </h1>
+          <p class="text-[11px] sm:text-xs text-gray-500 -mt-0.5">Govt. Brojomohon College, Barishal</p>
+        </div>
+      </div>
+      <button id="openRegisterBtn" class="bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 px-4 rounded-xl shadow-md shadow-red-200 transition flex items-center gap-2">
+        <i class="fas fa-user-plus"></i>
+        <span class="hidden sm:inline">Register as Donor</span>
+        <span class="sm:hidden">Register</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-6 md:py-8">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-5 md:p-7 mb-8">
+      <div class="flex items-center gap-2 mb-1">
+        <i class="fas fa-magnifying-glass text-red-500"></i>
+        <h2 class="text-lg font-bold text-gray-800">Find a Blood Donor</h2>
+      </div>
+      <p class="text-sm text-gray-500 mb-5">Select a blood group and click Search to view matching donors.</p>
+      <div class="flex flex-col md:flex-row md:items-end gap-4">
+        <div class="flex-1">
+          <label for="bloodGroupSelect" class="block text-sm font-semibold text-gray-700 mb-1.5">
+            <i class="fas fa-filter text-red-500 mr-1.5"></i>Blood Group
+          </label>
+          <div class="relative">
+            <select id="bloodGroupSelect" class="w-full md:w-72 appearance-none bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 pr-10 text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 transition">
+              <option value="" disabled selected>— Select a blood group —</option>
+              <option value="A+">A+</option>
+              <option value="A-">A−</option>
+              <option value="B+">B+</option>
+              <option value="B-">B−</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB−</option>
+              <option value="O+">O+</option>
+              <option value="O-">O−</option>
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-3 flex items-center text-gray-500">
+              <i class="fas fa-chevron-down text-sm"></i>
+            </div>
+          </div>
+        </div>
+        <button id="searchBtn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-xl shadow-md shadow-red-200 transition flex items-center justify-center gap-2">
+          <i class="fas fa-magnifying-glass"></i> Search
+        </button>
+      </div>
+      <div id="searchHint" class="text-xs text-gray-400 mt-4 flex items-center gap-1.5">
+        <i class="fas fa-circle-info"></i>
+        Donor list will appear here after you search. "N/A" indicates no phone number available.
+      </div>
+    </div>
+
+    <section id="resultsSection" class="hidden">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+          <i class="fas fa-users text-red-500"></i> Matching Donors
+        </h2>
+        <span id="resultCount" class="text-sm bg-gray-200 text-gray-700 font-semibold px-3.5 py-1.5 rounded-full">0 donors</span>
+      </div>
+      <div id="donorGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+      <div id="emptyState" class="hidden bg-white rounded-2xl border border-dashed border-gray-200 p-10 text-center mt-4">
+        <i class="fas fa-face-frown text-4xl text-gray-300 mb-3"></i>
+        <p class="text-gray-500 font-medium">No donors found for this blood group.</p>
+        <p class="text-sm text-gray-400 mt-1">Try selecting a different blood type.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="text-center text-xs text-gray-400 py-8 border-t border-gray-200/70 mt-10">
+    <p>🩸 Department of Statistics · Govt. Brojomohon College, Barishal — Every drop counts.</p>
+    <button id="openAdminBtn" class="mt-3 text-gray-400 hover:text-red-500 transition text-[11px] underline underline-offset-2">
+      <i class="fas fa-lock text-[10px]"></i> Admin Corner
+    </button>
+  </footer>
+
+  <div id="registerModal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 fade-in relative">
+      <button id="closeRegisterBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="flex items-center gap-2.5 mb-1">
+        <div class="bg-red-50 text-red-600 p-2 rounded-lg"><i class="fas fa-user-plus"></i></div>
+        <h3 class="text-lg font-bold text-gray-800">Register as Donor</h3>
+      </div>
+      <p class="text-xs text-gray-500 mb-5">Your details will be added to the donor directory.</p>
+      <form id="registerForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+          <input type="text" id="regName" required placeholder="Enter your name" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 transition" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Phone Number</label>
+          <input type="text" id="regPhone" placeholder="01XXXXXXXXX (or leave blank for N/A)" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 transition" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Blood Group</label>
+            <select id="regBlood" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 transition">
+              <option value="" disabled selected>Select</option>
+              <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+              <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Batch</label>
+            <select id="regBatch" required class="w-full bg-gray-50 border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-red-400 transition">
+              <option value="" disabled selected>Select</option>
+              <option>7th Batch</option><option>8th Batch</option><option>9th Batch</option><option>10th Batch</option>
+              <option>11th Batch</option><option>12th Batch</option><option>13th Batch</option><option>14th Batch</option>
+            </select>
+          </div>
+        </div>
+        <div id="registerError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-md shadow-red-200 transition flex items-center justify-center gap-2">
+          <i class="fas fa-check"></i> Save Donor
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <div id="adminLoginModal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-4 modal-backdrop">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 fade-in relative">
+      <button id="closeAdminLoginBtn" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+        <i class="fas fa-times"></i>
+      </button>
+      <div class="flex items-center gap-2.5 mb-1">
+        <div class="bg-gray-800 text-white p-2 rounded-lg"><i class="fas fa-lock"></i></div>
+        <h3 class="text-lg font-bold text-gray-800">Admin Login</h3>
+      </div>
+      <p class="text-xs text-gray-500 mb-5">Restricted access. Authorized personnel only.</p>
+      <form id="adminLoginForm" class="space-y-4">
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Admin ID</label>
+          <input type="text" id="adminId" required placeholder="Enter admin ID" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition" />
+        </div>
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
+          <input type="password" id="adminPass" required placeholder="Enter password" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gray-500 focus:border-gray-500 transition" />
+        </div>
+        <div id="adminLoginError" class="hidden text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2"></div>
+        <button type="submit" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2">
+          <i class="fas fa-right-to-bracket"></i> Login
+        </button>
+      </form>
+    </div>
+  </div>
+<div id="adminPanelModal" class="hidden fixed inset-0 z-40 flex items-center justify-center p-3 sm:p-4 modal-backdrop">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col fade-in relative">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <div class="flex items-center gap-2.5">
+        <div class="bg-gray-900 text-white p-2 rounded-lg"><i class="fas fa-user-shield"></i></div>
+        <div>
+          <h3 class="text-lg font-bold text-gray-800 leading-tight">Admin Panel</h3>
+          <p class="text-[11px] text-gray-500">Full donor directory management</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="adminTotalBadge" class="text-xs bg-red-100 text-red-700 font-bold px-3 py-1.5 rounded-full">0 donors</span>
+        <button id="closeAdminPanelBtn" class="text-gray-400 hover:text-gray-600 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+    </div>
+    <div class="px-5 py-3 border-b border-gray-100 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+      <div class="relative flex-1 max-w-xs">
+        <input id="adminSearchInput" type="text" placeholder="Search name, phone, batch..." class="w-full bg-gray-50 border border-gray-300 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition" />
+        <i class="fas fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+      </div>
+      <select id="adminFilterBlood" class="bg-gray-50 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-400 transition">
+        <option value="all">All blood groups</option>
+        <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+        <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+      </select>
+    </div>
+    <div class="overflow-auto custom-scroll flex-1">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 sticky top-0 z-10">
+          <tr class="text-left text-gray-600">
+            <th class="px-4 py-2.5 font-semibold">#</th>
+            <th class="px-4 py-2.5 font-semibold">Name</th>
+            <th class="px-4 py-2.5 font-semibold">Phone</th>
+            <th class="px-4 py-2.5 font-semibold">Blood</th>
+            <th class="px-4 py-2.5 font-semibold">Batch</th>
+            <th class="px-4 py-2.5 font-semibold text-right">Action</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </div>
+    <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+      <span id="adminVisibleCount">Showing 0 donors</span>
+      <button id="adminLogoutBtn" class="text-red-600 hover:text-red-700 font-semibold flex items-center gap-1.5">
+        <i class="fas fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-gray-900 text-white text-sm font-medium px-5 py-3 rounded-xl shadow-2xl flex items-center gap-2">
+  <i id="toastIcon" class="fas fa-check-circle text-green-400"></i>
+  <span id="toastMsg">Saved</span>
+</div>
+
+<script>
+  let donors = [
+    // ---- 7th Batch ----
+    { name: "MD RAFIJUR RAHMAN (ZUBORAJ)", phone: "01521549709", blood: "A+", batch: "7th Batch" },
+    { name: "SADIA NAZNIN", phone: "N/A", blood: "AB+", batch: "7th Batch" },
+    { name: "AL MUHA TAMIM", phone: "01519609076", blood: "B+", batch: "7th Batch" },
+    { name: "MD. SHARIFUZZAMAN", phone: "01315330110", blood: "O+", batch: "7th Batch" },
+    { name: "SAYEM BABU", phone: "01776767816", blood: "O+", batch: "7th Batch" },
+    { name: "MD. SHAKIL", phone: "01626931616", blood: "AB+", batch: "7th Batch" },
+    { name: "T.M. ZAYED", phone: "01739647099", blood: "B+", batch: "7th Batch" },
+    { name: "SAKKHAR DEBNATH", phone: "01533568650", blood: "B+", batch: "7th Batch" },
+    { name: "SAIFUL ISLAM NUHASH", phone: "171309492", blood: "B+", batch: "7th Batch" },
+    { name: "NISHAT JAMAN", phone: "N/A", blood: "O+", batch: "7th Batch" },
+    { name: "ALBEDA MEHEDI", phone: "01633731542", blood: "A+", batch: "7th Batch" },
+    { name: "SHARIYAR", phone: "01789236682", blood: "AB+", batch: "7th Batch" },
+    { name: "ARNOB BISWAS", phone: "01795899588", blood: "B-", batch: "7th Batch" },
+    { name: "ALAUDDIN KHAN", phone: "01577031424", blood: "O+", batch: "7th Batch" },
+    { name: "SHAKIB HASAN", phone: "01794931273", blood: "A+", batch: "7th Batch" },
+    { name: "AMINUL ISLAM AMIN", phone: "01721900492", blood: "O+", batch: "7th Batch" },
+    { name: "MEGHLA", phone: "N/A", blood: "B-", batch: "7th Batch" },
+    { name: "MD SHAKIB", phone: "01779051147", blood: "A+", batch: "7th Batch" },
+    { name: "JANNATUL CHOITY", phone: "N/A", blood: "B+", batch: "7th Batch" },
+    { name: "FOUZIA NILA", phone: "N/A", blood: "A+", batch: "7th Batch" },
+    { name: "MEADUL", phone: "01630475777", blood: "O+", batch: "7th Batch" },
+
+    // ---- 8th Batch ----
+    { name: "SAMAPTY", phone: "N/A", blood: "O+", batch: "8th Batch" },
+    { name: "Nayan Sarker", phone: "01309058667", blood: "O+", batch: "8th Batch" },
+    { name: "Niloy Saha", phone: "01757707421", blood: "B+", batch: "8th Batch" },
+    { name: "Ashru", phone: "01763873614", blood: "B+", batch: "8th Batch" },
+    { name: "Humayra", phone: "N/A", blood: "B+", batch: "8th Batch" },
+    { name: "Smrity", phone: "N/A", blood: "A+", batch: "8th Batch" },
+    { name: "Oyshee", phone: "N/A", blood: "B+", batch: "8th Batch" },
+    { name: "Omar Faruk", phone: "01774067735", blood: "O+", batch: "8th Batch" },
+    { name: "Ekram", phone: "01705146805", blood: "B+", batch: "8th Batch" },
+    { name: "Talim", phone: "01720045604", blood: "O+", batch: "8th Batch" },
+    { name: "Sonia", phone: "N/A", blood: "O+", batch: "8th Batch" },
+    { name: "Nabin", phone: "01795346671", blood: "O+", batch: "8th Batch" },
+    { name: "Sabuj", phone: "01405430182", blood: "B+", batch: "8th Batch" },
+    { name: "Chandrika", phone: "N/A", blood: "O+", batch: "8th Batch" },
+
+    // ---- 9th Batch ----
+    { name: "Saiful Islam Gazi", phone: "01708574833", blood: "A+", batch: "9th Batch" },
+    { name: "Farabi Ahmed Mahedi", phone: "01921214421", blood: "O+", batch: "9th Batch" },
+    { name: "Ashraful Haque Lohan", phone: "01304935757", blood: "O+", batch: "9th Batch" },
+    { name: "Jewel Rana", phone: "01569152253", blood: "B+", batch: "9th Batch" },
+    { name: "Hasibul Islam Rafi", phone: "01748850423", blood: "O+", batch: "9th Batch" },
+    { name: "Akhi Khanam", phone: "N/A", blood: "A+", batch: "9th Batch" },
+    { name: "Abdullah", phone: "01745138733", blood: "B+", batch: "9th Batch" },
+    { name: "Amir", phone: "01744244356", blood: "O+", batch: "9th Batch" },
+    { name: "Saifur Rahman Opu", phone: "01727180658", blood: "O+", batch: "9th Batch" },
+    { name: "Mridha Bayjed Ahmed", phone: "01302100545", blood: "O-", batch: "9th Batch" },
+    { name: "Ashik", phone: "01307610036", blood: "B+", batch: "9th Batch" },
+    { name: "Sidratul Muntaha Rafia", phone: "N/A", blood: "O-", batch: "9th Batch" },
+    { name: "Ashiqur Rahman", phone: "01317506253", blood: "B+", batch: "9th Batch" },
+    { name: "Jishan", phone: "N/A", blood: "N/A", batch: "9th Batch" },
+    { name: "Shariar Sejan", phone: "01813227221", blood: "B+", batch: "9th Batch" },
+    { name: "Jubayer", phone: "01406836507", blood: "O+", batch: "9th Batch" },
+    { name: "Simi", phone: "N/A", blood: "B+", batch: "9th Batch" },
+
+    // ---- 10th Batch ----
+    { name: "MAHI", phone: "N/A", blood: "AB+", batch: "10th Batch" },
+    { name: "SUSMITA Karmakar", phone: "N/A", blood: "O+", batch: "10th Batch" },
+    { name: "FARDIN KHAN", phone: "01714157038", blood: "A+", batch: "10th Batch" },
+    { name: "MI SHOAIB", phone: "01521724236", blood: "B+", batch: "10th Batch" },
+    { name: "ADIBA AFRIN", phone: "N/A", blood: "B+", batch: "10th Batch" },
+    { name: "SUJON", phone: "01787125553", blood: "A+", batch: "10th Batch" },
+    { name: "Khadizatul kobra Mim", phone: "N/A", blood: "A+", batch: "10th Batch" },
+    { name: "Asif", phone: "01888460006", blood: "O+", batch: "10th Batch" },
+    { name: "Biswozit Gharame", phone: "01752002558", blood: "B+", batch: "10th Batch" },
+    { name: "Lamia Akter Sume", phone: "N/A", blood: "O+", batch: "10th Batch" },
+    { name: "Shariat Jomaddar", phone: "01619992963", blood: "AB+", batch: "10th Batch" },
+    { name: "Mohammad Sakib", phone: "01304507495", blood: "O+", batch: "10th Batch" },
+    { name: "Sworna Moni", phone: "N/A", blood: "B+", batch: "10th Batch" },
+    { name: "Sumaiya Afrin", phone: "N/A", blood: "B+", batch: "10th Batch" },
+    { name: "Adib Hasan", phone: "01763034323", blood: "B+", batch: "10th Batch" },
+    { name: "Md. Imran Hossain", phone: "N/A", blood: "B+", batch: "10th Batch" },
+    { name: "Azam", phone: "01701018524", blood: "O+", batch: "10th Batch" },
+    { name: "Raiyan", phone: "01927894216", blood: "A+", batch: "10th Batch" },
+    { name: "Md Tanvir Rahman", phone: "N/A", blood: "N/A", batch: "10th Batch" },
+      // ---- 11th Batch ----
+      { name: "ESTIAK SIAM", phone: "01706779389", blood: "O+", batch: "11th Batch" },
+      { name: "MARIA TAZMIM", phone: "N/A", blood: "A-", batch: "11th Batch" },
+      { name: "ARBATUL RATUL", phone: "01720921286", blood: "A+", batch: "11th Batch" },
+      { name: "JEET DAS", phone: "01403570846", blood: "B+", batch: "11th Batch" },
+      { name: "ANKON DAS", phone: "01609552610", blood: "B+", batch: "11th Batch" },
+      { name: "S M NIAJ", phone: "01791493474", blood: "B+", batch: "11th Batch" },
+      { name: "NILANTY BISWAS", phone: "N/A", blood: "A+", batch: "11th Batch" },
+      { name: "KAMRUL", phone: "01603656180", blood: "B+", batch: "11th Batch" },
+      { name: "SAHIDUL", phone: "01742553216", blood: "A+", batch: "11th Batch" },
+      { name: "AYUS HALDER", phone: "01304277801", blood: "B+", batch: "11th Batch" },
+      { name: "Farhan Muhib", phone: "01725919891", blood: "O+", batch: "11th Batch" },
+      { name: "ONI", phone: "N/A", blood: "O+", batch: "11th Batch" },
+      { name: "RIGUN", phone: "01921503125", blood: "B+", batch: "11th Batch" },
+      { name: "RADIYA", phone: "N/A", blood: "A+", batch: "11th Batch" },
+      { name: "TOMA", phone: "N/A", blood: "B+", batch: "11th Batch" },
+      { name: "SADMAN", phone: "01553226055", blood: "A+", batch: "11th Batch" },
+      { name: "OVI", phone: "160160184", blood: "B+", batch: "11th Batch" },
+      { name: "MUNNA", phone: "N/A", blood: "A+", batch: "11th Batch" },
+      { name: "ASHIK", phone: "01748037162", blood: "O+", batch: "11th Batch" },
+      { name: "RIMON", phone: "01575421356", blood: "A+", batch: "11th Batch" },
+      { name: "FAHIM", phone: "01722011954", blood: "A+", batch: "11th Batch" },
+      { name: "RAYHAN", phone: "01819974205", blood: "A+", batch: "11th Batch" },
+      { name: "SNEHA", phone: "N/A", blood: "B+", batch: "11th Batch" },
+      { name: "NOMAN", phone: "01602462932", blood: "B+", batch: "11th Batch" },
+      { name: "MIYDUL", phone: "01610412504", blood: "B+", batch: "11th Batch" },
+      { name: "RATNA AKTER", phone: "N/A", blood: "B+", batch: "11th Batch" },
+      { name: "TASMIMA NAHER", phone: "N/A", blood: "B+", batch: "11th Batch" },
+      { name: "MIM KONIKA", phone: "N/A", blood: "O+", batch: "11th Batch" },
+      { name: "ASRAFUL ISLAM", phone: "01306332339", blood: "O+", batch: "11th Batch" },
+      { name: "RABBI", phone: "01738918600", blood: "AB+", batch: "11th Batch" },
+      { name: "NUSRAT JAHAN HAFSA", phone: "N/A", blood: "B+", batch: "11th Batch" },
+      { name: "MEGHLA", phone: "N/A", blood: "O+", batch: "11th Batch" },
+      { name: "AJRA TABASSUM AFIYA", phone: "N/A", blood: "B+", batch: "11th Batch" },
+      { name: "FARIHA ISLAM", phone: "N/A", blood: "O+", batch: "11th Batch" },
+      { name: "HRIDITA RAHMAN", phone: "N/A", blood: "B+", batch: "11th Batch" },
+      { name: "AL AMIM", phone: "01302696330", blood: "B+", batch: "11th Batch" },
+      { name: "DEEP SARKAR", phone: "01718436506", blood: "B+", batch: "11th Batch" },
+      { name: "SOLAIMAN MOLLIK", phone: "01740898653", blood: "B+", batch: "11th Batch" },
+
+      // ---- 12th Batch ----
+      { name: "Mushfiqur Rahman", phone: "8801312540359", blood: "A+", batch: "12th Batch" },
+      { name: "Arobi Subah", phone: "N/A", blood: "A+", batch: "12th Batch" },
+      { name: "Sayem", phone: "8801580816296", blood: "AB-", batch: "12th Batch" },
+      { name: "Sayeda Jannat", phone: "N/A", blood: "A+", batch: "12th Batch" },
+      { name: "Injam", phone: "8801313811368", blood: "A+", batch: "12th Batch" },
+      { name: "Tariqul Islam", phone: "8801608571863", blood: "A+", batch: "12th Batch" },
+      { name: "Karima Islam", phone: "N/A", blood: "A+", batch: "12th Batch" },
+      { name: "Rahatul Islam", phone: "8801916086523", blood: "A+", batch: "12th Batch" },
+      { name: "Suchana", phone: "N/A", blood: "A+", batch: "12th Batch" },
+      { name: "Arnob", phone: "8801990170518", blood: "A+", batch: "12th Batch" },
+      { name: "Noman Hossain", phone: "8801775350189", blood: "A+", batch: "12th Batch" },
+      { name: "Manjila Jahan", phone: "N/A", blood: "A+", batch: "12th Batch" },
+      { name: "Touhidul Islam Nahid", phone: "N/A", blood: "A+", batch: "12th Batch" },
+      { name: "Tanim", phone: "8801706579309", blood: "B+", batch: "12th Batch" },
+      { name: "Raja", phone: "8801710244515", blood: "B+", batch: "12th Batch" },
+      { name: "Hujaifa", phone: "8801721497446", blood: "B+", batch: "12th Batch" },
+      { name: "Sadat", phone: "8801540028599", blood: "B+", batch: "12th Batch" },
+      { name: "Siam", phone: "8801885549768", blood: "B+", batch: "12th Batch" },
+      { name: "kanij Fatema", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Iqbal Mahmud", phone: "8801306870855", blood: "B+", batch: "12th Batch" },
+      { name: "Iqra Hasan Shifa", phone: "8801860550755", blood: "B+", batch: "12th Batch" },
+      { name: "Touhid islam", phone: "8801404981491", blood: "B+", batch: "12th Batch" },
+      { name: "Mst Rojina Akter", phone: "8801775567914", blood: "B+", batch: "12th Batch" },
+      { name: "Fahmida Hasan", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Eusuf", phone: "8801783313129", blood: "B+", batch: "12th Batch" },
+      { name: "Lamia Akter", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Sadman", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Arpita Biswas", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Moien Hossen", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Nure Jannat", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "HM Fayez", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Rajit", phone: "N/A", blood: "B+", batch: "12th Batch" },
+      { name: "Devasish Halder", phone: "N/A", blood: "B+", batch: "12th Batch" },
+
+      // ---- 13th Batch ----
+      { name: "MD.Mehedi Hasan", phone: "01309682940", blood: "B+", batch: "13th Batch" },
+      { name: "Tasrif Ahmed", phone: "01975671898", blood: "N/A", batch: "13th Batch" },
+      { name: "Sumona", phone: "N/A", blood: "B+", batch: "13th Batch" },
+      { name: "Islam", phone: "01917118975", blood: "B+", batch: "13th Batch" },
+      { name: "Sumiya", phone: "N/A", blood: "AB+", batch: "13th Batch" },
+      { name: "Zinia", phone: "N/A", blood: "O+", batch: "13th Batch" },
+      { name: "Humyra", phone: "N/A", blood: "B+", batch: "13th Batch" },
+      { name: "Anika Islam", phone: "N/A", blood: "A+", batch: "13th Batch" },
+      { name: "Maria", phone: "N/A", blood: "B+", batch: "13th Batch" },
+      { name: "Kousik", phone: "N/A", blood: "O+", batch: "13th Batch" },
+      { name: "Munni", phone: "N/A", blood: "AB+", batch: "13th Batch" },
+      { name: "Ibrahim", phone: "01761773107", blood: "B+", batch: "13th Batch" },
+      { name: "Sagor", phone: "N/A", blood: "A+", batch: "13th Batch" },
+      { name: "Tamal", phone: "N/A", blood: "AB+", batch: "13th Batch" },
+      { name: "Saran", phone: "N/A", blood: "A+", batch: "13th Batch" },
+      { name: "Annendita", phone: "N/A", blood: "A+", batch: "13th Batch" },
+      { name: "Tarin Chowdhury", phone: "N/A", blood: "A+", batch: "13th Batch" },
+      { name: "Ripa", phone: "N/A", blood: "O+", batch: "13th Batch" },
+
+      // ---- 14th Batch (sample) ----
+      { name: "Arif Hossain", phone: "01711111111", blood: "O+", batch: "14th Batch" },
+      { name: "Nusrat Jahan", phone: "N/A", blood: "B+", batch: "14th Batch" },
+      { name: "Tanvir Ahmed", phone: "01822223333", blood: "A-", batch: "14th Batch" },
+      { name: "Samira Khan", phone: "01933334444", blood: "AB+", batch: "14th Batch" },
+      { name: "Rashedul Islam", phone: "01644445555", blood: "O-", batch: "14th Batch" },
+      { name: "Mehedi Hasan", phone: "01755556666", blood: "A+", batch: "14th Batch" },
+      { name: "Farhana Akter", phone: "N/A", blood: "B-", batch: "14th Batch" }
+    ];
+
+    const ADMIN_ID_B64 = "YWRtaW4=";
+    const ADMIN_PASS_PLAIN_RUNTIME = "stats@2024";
+
+    async function sha256(text) {
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest("SHA-256", enc);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function safeEqual(a, b) {
+      if (a.length !== b.length) return false;
+      let diff = 0;
+      for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+      return diff === 0;
+    }
+
+    (async () => {
+      try {
+        const hash = await sha256(ADMIN_PASS_PLAIN_RUNTIME);
+        sessionStorage.setItem("_ak", hash);
+      } catch (e) {}
+    })();
+
+    let currentSearchBlood = null;
+    let adminLoggedIn = false;
+
+    const bloodSelect    = document.getElementById("bloodGroupSelect");
+    const searchBtn      = document.getElementById("searchBtn");
+    const resultsSection = document.getElementById("resultsSection");
+    const donorGrid      = document.getElementById("donorGrid");
+    const resultCount    = document.getElementById("resultCount");
+    const emptyState     = document.getElementById("emptyState");
+    const searchHint     = document.getElementById("searchHint");
+
+    const openRegisterBtn  = document.getElementById("openRegisterBtn");
+    const registerModal    = document.getElementById("registerModal");
+    const closeRegisterBtn = document.getElementById("closeRegisterBtn");
+    const registerForm     = document.getElementById("registerForm");
+    const registerError    = document.getElementById("registerError");
+
+    const openAdminBtn       = document.getElementById("openAdminBtn");
+    const adminLoginModal    = document.getElementById("adminLoginModal");
+    const closeAdminLoginBtn = document.getElementById("closeAdminLoginBtn");
+    const adminLoginForm     = document.getElementById("adminLoginForm");
+    const adminLoginError    = document.getElementById("adminLoginError");
+
+    const adminPanelModal    = document.getElementById("adminPanelModal");
+    const closeAdminPanelBtn = document.getElementById("closeAdminPanelBtn");
+    const adminTableBody     = document.getElementById("adminTableBody");
+    const adminSearchInput   = document.getElementById("adminSearchInput");
+    const adminFilterBlood   = document.getElementById("adminFilterBlood");
+    const adminTotalBadge    = document.getElementById("adminTotalBadge");
+    const adminVisibleCount  = document.getElementById("adminVisibleCount");
+    const adminLogoutBtn     = document.getElementById("adminLogoutBtn");
+
+    const toast     = document.getElementById("toast");
+    const toastMsg  = document.getElementById("toastMsg");
+    const toastIcon = document.getElementById("toastIcon");
+
+    function getBadgeStyle(blood) {
+      const base = "blood-badge";
+      switch (blood) {
+        case "A+": return base + " bg-red-100 text-red-800";
+        case "A-": return base + " bg-red-50 text-red-700";
+        case "B+": return base + " bg-blue-100 text-blue-800";
+        case "B-": return base + " bg-blue-50 text-blue-700";
+        case "AB+": return base + " bg-purple-100 text-purple-800";
+        case "AB-": return base + " bg-purple-50 text-purple-700";
+        case "O+": return base + " bg-amber-100 text-amber-800";
+        case "O-": return base + " bg-amber-50 text-amber-700";
+        default:   return base + " bg-gray-100 text-gray-700";
+      }
+    }
+
+    function showToast(msg, type = "success") {
+      toastMsg.textContent = msg;
+      toastIcon.className = type === "error"
+        ? "fas fa-circle-exclamation text-red-400"
+        : "fas fa-check-circle text-green-400";
+      toast.classList.remove("hidden");
+      clearTimeout(showToast._t);
+      showToast._t = setTimeout(() => toast.classList.add("hidden"), 2800);
+    }
+
+    function openModal(el)  { el.classList.remove("hidden"); document.body.style.overflow = "hidden"; }
+    function closeModal(el) { el.classList.add("hidden");    document.body.style.overflow = ""; }
+
+    function renderDonorCards(list) {
+      donorGrid.innerHTML = "";
+      if (list.length === 0) {
+        donorGrid.classList.add("hidden");
+        emptyState.classList.remove("hidden");
+      } else {
+        donorGrid.classList.remove("hidden");
+        emptyState.classList.add("hidden");
+        list.forEach(donor => {
+          const phoneDisplay = (donor.phone && donor.phone !== "N/A" && donor.phone.trim() !== "") ? donor.phone : "N/A";
+          const card = document.createElement("div");
+          card.className = "donor-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex flex-col gap-2.5";
+          card.innerHTML = `
+            <div class="flex items-start justify-between gap-2">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                  <i class="fas fa-user text-sm"></i>
+                </div>
+                <h3 class="font-bold text-gray-800 leading-tight text-[15px]">${donor.name}</h3>
+              </div>
+              <span class="${getBadgeStyle(donor.blood)}">${donor.blood}</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-gray-600 mt-1">
+              <i class="fas fa-phone text-gray-400 w-4 text-xs"></i>
+              <span class="${phoneDisplay === "N/A" ? "text-gray-400 italic" : "font-medium text-gray-700"}">${phoneDisplay}</span>
+            </div>
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+              <i class="fas fa-layer-group text-gray-400 w-4 text-xs"></i>
+              <span>${donor.batch}</span>
+            </div>
+          `;
+          donorGrid.appendChild(card);
+        });
+      }
+      resultCount.textContent = `${list.length} donor${list.length !== 1 ? "s" : ""}`;
+    }
+
+    function performSearch() {
+      const selected = bloodSelect.value;
+      if (!selected) {
+        searchHint.innerHTML = `<i class="fas fa-triangle-exclamation text-amber-500"></i><span class="text-amber-600 font-medium">Please select a blood group first.</span>`;
+        resultsSection.classList.add("hidden");
+        currentSearchBlood = null;
+        return;
+      }
+      currentSearchBlood = selected;
+      const filtered = donors.filter(d => d.blood === selected);
+      resultsSection.classList.remove("hidden");
+      renderDonorCards(filtered);
+      resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    searchBtn.addEventListener("click", performSearch);
+    bloodSelect.addEventListener("change", () => {
+      searchHint.innerHTML = `<i class="fas fa-circle-info"></i> Donor list will appear here after you search. "N/A" indicates no phone number available.`;
+    });
+
+    openRegisterBtn.addEventListener("click", () => {
+      registerError.classList.add("hidden");
+      registerForm.reset();
+      openModal(registerModal);
+    });
+    closeRegisterBtn.addEventListener("click", () => closeModal(registerModal));
+    registerModal.addEventListener("click", e => { if (e.target === registerModal) closeModal(registerModal); });
+
+    registerForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const name  = document.getElementById("regName").value.trim();
+      const phone = document.getElementById("regPhone").value.trim() || "N/A";
+      const blood = document.getElementById("regBlood").value;
+      const batch = document.getElementById("regBatch").value;
+      if (!name || !blood || !batch) {
+        registerError.textContent = "Please fill in all required fields.";
+        registerError.classList.remove("hidden");
+        return;
+      }
+      donors.push({ name, phone, blood, batch });
+      registerError.classList.add("hidden");
+      closeModal(registerModal);
+      showToast("Donor registered successfully!");
+      if (currentSearchBlood) renderDonorCards(donors.filter(d => d.blood === currentSearchBlood));
+      if (adminLoggedIn && !adminPanelModal.classList.contains("hidden")) renderAdminTable();
+    });
+
+    openAdminBtn.addEventListener("click", () => {
+      adminLoginError.classList.add("hidden");
+      adminLoginForm.reset();
+      openModal(adminLoginModal);
+    });
+    closeAdminLoginBtn.addEventListener("click", () => closeModal(adminLoginModal));
+    adminLoginModal.addEventListener("click", e => { if (e.target === adminLoginModal) closeModal(adminLoginModal); });
+
+    adminLoginForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const idVal  = document.getElementById("adminId").value.trim();
+      const passVal= document.getElementById("adminPass").value;
+      let expectedId = "";
+      try { expectedId = atob(ADMIN_ID_B64); } catch (_) {}
+      let enteredHash = "";
+      try { enteredHash = await sha256(passVal); } catch (_) {}
+      const correctHash = sessionStorage.getItem("_ak") || "";
+      const idOk   = safeEqual(idVal, expectedId);
+      const passOk = safeEqual(enteredHash, correctHash);
+      if (idOk && passOk) {
+        adminLoggedIn = true;
+        adminLoginError.classList.add("hidden");
+        closeModal(adminLoginModal);
+        openAdminPanel();
+      } else {
+        adminLoginError.textContent = "Invalid Admin ID or Password. Access denied.";
+        adminLoginError.classList.remove("hidden");
+      }
+    });
+
+    function openAdminPanel() { renderAdminTable(); openModal(adminPanelModal); }
+    closeAdminPanelBtn.addEventListener("click", () => closeModal(adminPanelModal));
+    adminPanelModal.addEventListener("click", e => { if (e.target === adminPanelModal) closeModal(adminPanelModal); });
+    adminLogoutBtn.addEventListener("click", () => {
+      adminLoggedIn = false;
+      closeModal(adminPanelModal);
+      showToast("Logged out from Admin Panel.");
+    });
+
+    function renderAdminTable() {
+      const term = adminSearchInput.value.trim().toLowerCase();
+      const bloodFilter = adminFilterBlood.value;
+      let list = donors.slice();
+      if (bloodFilter !== "all") list = list.filter(d => d.blood === bloodFilter);
+      if (term) {
+        list = list.filter(d =>
+          d.name.toLowerCase().includes(term) ||
+          (d.phone && d.phone.toLowerCase().includes(term)) ||
+          d.batch.toLowerCase().includes(term) ||
+          d.blood.toLowerCase().includes(term)
+        );
+      }
+      adminTotalBadge.textContent = `${donors.length} donors`;
+      adminVisibleCount.textContent = `Showing ${list.length} donor${list.length !== 1 ? "s" : ""}`;
+      adminTableBody.innerHTML = "";
+      if (list.length === 0) {
+        adminTableBody.innerHTML = `<tr><td colspan="6" class="px-4 py-10 text-center text-gray-400 text-sm"><i class="fas fa-inbox text-2xl mb-2 block"></i>No matching donors.</td></tr>`;
+        return;
+      }
+      list.forEach((donor, i) => {
+        const idx = donors.indexOf(donor);
+        const phoneDisplay = (donor.phone && donor.phone !== "N/A" && donor.phone.trim() !== "") ? donor.phone : "N/A";
+        const tr = document.createElement("tr");
+        tr.className = "border-b border-gray-50 hover:bg-gray-50/70 transition";
+        tr.innerHTML = `
+          <td class="px-4 py-2.5 text-gray-400 text-xs">${i + 1}</td>
+          <td class="px-4 py-2.5 font-medium text-gray-800">${donor.name}</td>
+          <td class="px-4 py-2.5 ${phoneDisplay === "N/A" ? "text-gray-400 italic" : "text-gray-600"}">${phoneDisplay}</td>
+          <td class="px-4 py-2.5"><span class="${getBadgeStyle(donor.blood)} text-xs">${donor.blood}</span></td>
+          <td class="px-4 py-2.5 text-gray-500">${donor.batch}</td>
+          <td class="px-4 py-2.5 text-right">
+            <button data-idx="${idx}" class="delete-donor text-red-500 hover:text-red-700 hover:bg-red-50 w-7 h-7 rounded-lg transition inline-flex items-center justify-center" title="Remove donor">
+              <i class="fas fa-trash-can text-xs"></i>
+            </button>
+          </td>
+        `;
+                adminTableBody.appendChild(tr);
+      });
+      adminTableBody.querySelectorAll(".delete-donor").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const idx = parseInt(btn.getAttribute("data-idx"), 10);
+          if (!isNaN(idx) && idx >= 0 && idx < donors.length) {
+            const removed = donors.splice(idx, 1)[0];
+            showToast(`Removed "${removed.name}" from directory.`);
+            renderAdminTable();
+            if (currentSearchBlood) renderDonorCards(donors.filter(d => d.blood === currentSearchBlood));
+          }
+        });
+      });
+    }
+
+    adminSearchInput.addEventListener("input", renderAdminTable);
+    adminFilterBlood.addEventListener("change", renderAdminTable);
+
+    document.addEventListener("keydown", e => {
+      if (e.key !== "Escape") return;
+      [registerModal, adminLoginModal, adminPanelModal].forEach(m => {
+        if (!m.classList.contains("hidden")) closeModal(m);
+      });
+    });
+  </script>
+</body>
+</html>
